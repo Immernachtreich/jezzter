@@ -12,7 +12,7 @@ import {
 } from '@sequelize/core/decorators-legacy';
 
 @Table({ freezeTableName: true, tableName: 'users' })
-class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -31,5 +31,3 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   @NotNull
   declare password: string;
 }
-
-export { User };
