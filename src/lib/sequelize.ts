@@ -1,11 +1,19 @@
-import { Sequelize } from '@sequelize/core';
+import { User } from '../models/user.model';
+import { Sequelize, importModels } from '@sequelize/core';
+import path from 'path';
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   dialect: 'sqlite',
-  username: 'your_username',
-  password: 'your_password',
-  database: 'your_database',
-  host: '127.0.0.1',
+  storage: path.join(__dirname, 'src/database/database.sqlite'),
+  // models: await importModels(__dirname + '/src/models/*.model.{ts,js}'),
+  models: [User],
 });
 
-export default sequelize;
+(async function authenticateSequelize() {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+})();
