@@ -10,11 +10,9 @@ export default function Login(): React.JSX.Element {
   const [password, setPassword] = useState<string>('');
 
   async function onLogin(): Promise<void> {
-    console.log('reached');
-
     try {
       const loginResponse = await axios({
-        url: '/api/login',
+        url: '/api/auth/login',
         method: 'POST',
         data: { email, password },
       });
