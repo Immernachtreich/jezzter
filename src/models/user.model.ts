@@ -11,7 +11,12 @@ import {
   Index,
 } from '@sequelize/core/decorators-legacy';
 
-@Table({ freezeTableName: true, tableName: 'users' })
+@Table({
+  freezeTableName: true,
+  tableName: 'users',
+  defaultScope: { attributes: { exclude: ['password'] } },
+  scopes: { passwordIncluded: { attributes: { include: ['password'] } } },
+})
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
