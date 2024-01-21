@@ -1,6 +1,6 @@
 import { User } from '@/models/index';
 import Joi from 'joi';
-import { compare, hash } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { signToken } from '@/util/jwt';
 

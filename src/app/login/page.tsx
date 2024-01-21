@@ -3,8 +3,11 @@ import Header from '@/components/header/header';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
 
 export default function Login(): React.JSX.Element {
+  const router = useRouter();
+
   const [viewPassword, setViewPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -17,9 +20,10 @@ export default function Login(): React.JSX.Element {
         data: { email, password },
       });
 
-      console.log(loginResponse);
+      const token: string = loginResponse.data.token;
+      localStorage.setItem('token', token);
 
-      // const token: string = loginResponse.data.token;
+      router.push('/home');
     } catch (error) {
       console.error(error);
     }
