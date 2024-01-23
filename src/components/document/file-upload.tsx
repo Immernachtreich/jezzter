@@ -19,15 +19,14 @@ export default function FileUpload() {
         formData.append('files', file);
       }
 
-      const fileDetails = (
-        await axios({
-          url: '/api/cloud/file-upload',
-          method: 'POST',
-          data: formData,
-        })
-      ).data;
+      const res = await axios({
+        url: '/api/cloud/file-upload',
+        method: 'POST',
+        data: formData,
+        onUploadProgress: console.log,
+      });
 
-      console.log(fileDetails);
+      console.log(res);
     } catch (error: any) {
       console.error(error);
     }
