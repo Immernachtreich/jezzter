@@ -1,6 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes } from '@sequelize/core';
 
-import type { CreationOptional } from '@sequelize/core';
+import type { CreationOptional, NonAttribute } from '@sequelize/core';
 
 import {
   Attribute,
@@ -9,7 +9,9 @@ import {
   NotNull,
   Table,
   Index,
+  HasMany,
 } from '@sequelize/core/decorators-legacy';
+import File from './file.model';
 
 @Table({
   freezeTableName: true,
@@ -35,4 +37,8 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   @Attribute(DataTypes.STRING)
   @NotNull
   declare password: string;
+
+  /* User 1 <----> M File */
+  @HasMany(() => File, { foreignKey: 'userId', sourceKey: 'id' })
+  declare files?: NonAttribute<File[]>;
 }
