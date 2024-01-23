@@ -14,13 +14,14 @@ const handler = async (request: NextApiRequest, response: NextApiResponse) => {
       form.parse(request, (err, _fields, files) => (err ? reject(err) : resolve({ files })));
     });
 
-    const fileBuffer = fs.readFileSync(path.join(files['file']?.[0].filepath!));
+    const fileBuffer = fs.readFileSync(path.join(files['files']?.[0].filepath!));
 
     await uploadDocument(fileBuffer);
 
-    response.send({ good: 'done' });
+    response.send({});
   } catch (error: any) {
     console.error(error);
+    response.status(501).send({ error: error.message });
   }
 };
 
