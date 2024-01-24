@@ -3,9 +3,9 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import next from 'next';
-import { parse } from 'url';
+import initializeExpress from '../config/express';
 
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
@@ -18,13 +18,12 @@ const handle = app.getRequestHandler();
 (async function initialize() {
   try {
     await app.prepare();
-
-    // Direct all traffic from express to next server
     const server = express();
+    initializeExpress(server, handle);
 
-    server.all('*', (request: Request, response: Response) => {
-      const parsedUrl = parse(request.url, true);
-      handle(request, response, parsedUrl);
+    server.use(async (error: any, request: Request, response: Response, next: NextFunction) => {
+      console.error(error);
+      response.status(error.status || 501).send({ message: error.message });
     });
 
     server.listen(process.env.PORT ?? 3000, () =>
