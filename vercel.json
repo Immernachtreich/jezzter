@@ -2,7 +2,11 @@
   "version": 2,
   "builds": [
     { "src": "package.json", "use": "@vercel/node" },
-    { "src": "next.config.js", "use": "@vercel/next" }
+    { "src": "next.config.js", "use": "@vercel/next" },
+    { "src": "dist/server.js", "use": "@vercel/node" }
   ],
-  "output": { "/**/*": "dist/**/*" }
+  "routes": [{ "handle": "filesystem" }, { "src": "/(.*)", "dest": "/dist/server.js" }],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
