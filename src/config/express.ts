@@ -11,7 +11,7 @@ export default function initializeExpress(server: Application, handle: RequestHa
     if (request.url.startsWith(API_PREFIX)) {
       // remove /api from request and pass it on to the next express handler
       request.url = request.url.substring(API_PREFIX.length) ?? '/';
-      next();
+      return next();
     }
 
     // Remaining requests to be passed on to the nextjs handler
