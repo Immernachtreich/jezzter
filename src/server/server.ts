@@ -25,9 +25,9 @@ const handle = app.getRequestHandler();
     server.use('/debug', debugRouter);
     server.use('/auth', authRouter);
 
-    server.use(async (error: any, request: Request, response: Response, next: NextFunction) => {
+    server.use((error: any, _request: Request, response: Response, _next: NextFunction) => {
       console.error(error);
-      response.status(error.status || 501).send({ message: error.message });
+      response.status(error.statusCode ?? 501).send({ message: error.message });
     });
 
     server.listen(process.env.PORT ?? 3000, () =>

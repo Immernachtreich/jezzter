@@ -1,7 +1,7 @@
 'use client';
 import Header from '@/components/header/header';
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
 
@@ -13,24 +13,22 @@ export default function Login(): React.JSX.Element {
   const [password, setPassword] = useState<string>('');
 
   async function onLogin(): Promise<void> {
-    try {
-      const loginResponse = await axios({
-        url: '/api/auth/login',
-        method: 'POST',
-        data: { email, password },
+    axios<{ token: string }>({
+      url: '/api/auth/login',
+      method: 'POST',
+      data: { email, password },
+    })
+      .then((response: AxiosResponse<{ token: string }>) => {
+        localStorage.setItem('token', response.data.token);
+        router.push('/home');
+      })
+      .catch((error: any) => {
+        console.error(error);
       });
-
-      const token: string = loginResponse.data.token;
-      localStorage.setItem('token', token);
-
-      router.push('/home');
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   return (
-    <section className="flex flex-col justify-center items-center">
+    <main className="flex flex-col justify-center items-center">
       <Header />
 
       <div className="flex flex-col justify-center items-center my-5 w-full">
@@ -68,6 +66,6 @@ export default function Login(): React.JSX.Element {
           </button>
         </form>
       </div>
-    </section>
+    </main>
   );
 }
