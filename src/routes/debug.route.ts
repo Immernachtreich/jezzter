@@ -7,7 +7,7 @@ const router: Router = Router();
 
 /**
  * Middleware to stop any requests in production.
- * @returns {void} - Passes the request if environment is development.
+ * @returns {Promise<void>} - Passes the request if environment is development.
  * @throws {Error} - If environment is not production.
  */
 router.use(async (request: Request, response: Response, next: NextFunction): Promise<void> => {
@@ -15,12 +15,27 @@ router.use(async (request: Request, response: Response, next: NextFunction): Pro
   return next();
 });
 
+/**
+ * API for syncing all models to the database.
+ * DANNGEROUS as it could lead to database wipe.
+ * @response {{ message: string }} - Success message.
+ * @returns {Promise<Response>} - Success message if syncronization is successful.
+ * @throws {Error} - If syncronization fails.
+ */
 router.get('/sync_models', async (request: Request, response: Response): Promise<Response> => {
-  await sequelize.sync({ force: true });
+  await sequelize.sync();
 
   return response.status(200).send({ message: 'Syncronization successful' });
 });
 
+/**
+ * API for onboarding a new user.
+ * Creates a new user in the DB.
+ * @body {{ email: string, password: string, name: string }} - The user details
+ * @response {{ User }} - The created user.
+ * @returns {Promise<Response>}>
+ * @throws {Error} - For invalid user details or for failure of user creation.
+ */
 router.post('/signup', async (request: Request, response: Response): Promise<Response> => {
   const schema = Joi.object({
     name: Joi.string().required(),
@@ -29,9 +44,9 @@ router.post('/signup', async (request: Request, response: Response): Promise<Res
   });
   await schema.validateAsync(request.body);
 
-  const password = await hash(request.body.password, 10);
+  const password: string = await hash(request.body.password, 10);
 
-  const user = await User.create({
+  const user: User = await User.create({
     name: request.body.name,
     email: request.body.email,
     password,
