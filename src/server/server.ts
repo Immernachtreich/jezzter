@@ -7,6 +7,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import next from 'next';
 import initializeExpress from '../config/express';
 import { authRouter } from '../routes/index';
+import { sequelize } from '../models/index';
 
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
@@ -21,6 +22,8 @@ const handle = app.getRequestHandler();
     await app.prepare();
     const server = express();
     initializeExpress(server, handle);
+
+    await sequelize.authenticate();
 
     server.use('/auth', authRouter);
 
