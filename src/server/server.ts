@@ -6,6 +6,7 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 import express, { NextFunction, Request, Response } from 'express';
 import next from 'next';
 import initializeExpress from '../config/express';
+import { authRouter } from '../routes/index';
 
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
@@ -20,6 +21,8 @@ const handle = app.getRequestHandler();
     await app.prepare();
     const server = express();
     initializeExpress(server, handle);
+
+    server.use('/auth', authRouter);
 
     server.use(async (error: any, request: Request, response: Response, next: NextFunction) => {
       console.error(error);

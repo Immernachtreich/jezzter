@@ -1,5 +1,5 @@
-import { User } from '@/models/index';
-import { signToken } from '@/util/jwt';
+import { User } from '../models/index';
+import { signToken } from '../util/jwt';
 import { compare } from 'bcrypt';
 import { Request, Response, Router } from 'express';
 import Joi from 'joi';
