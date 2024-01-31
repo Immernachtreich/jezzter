@@ -11,7 +11,6 @@ import {
   Attribute,
   BelongsTo,
 } from '@sequelize/core/decorators-legacy';
-import { User } from '.';
 import File from './file.model';
 
 @Table({
@@ -29,6 +28,10 @@ export default class FileChunk extends Model<
 
   @Attribute(DataTypes.TEXT)
   declare telegramId: number;
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare order: number;
 
   /* FileChunk M <----> 1 File */
   @BelongsTo(() => File, {

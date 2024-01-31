@@ -31,12 +31,11 @@ export default class File extends Model<InferAttributes<File>, InferCreationAttr
 
   @Attribute(DataTypes.STRING)
   @NotNull
-  @Index({ unique: false })
-  declare path: string;
-
-  @Attribute(DataTypes.STRING)
-  @NotNull
   declare type: string;
+
+  @Attribute(DataTypes.BIGINT)
+  @NotNull
+  declare parentId: number;
 
   /* File M <----> 1 User */
   @BelongsTo(() => User, {
