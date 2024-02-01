@@ -14,7 +14,7 @@ const router: Router = Router();
  * @throws {Error} - If environment is not production.
  */
 router.use(async (request: Request, response: Response, next: NextFunction): Promise<void> => {
-  if (process.env.NODE_ENV !== 'development') throw new Error('Cannot sync models in production');
+  if (process.env.NODE_ENV !== 'development') throw new Error('Cannot use debug in production');
   return next();
 });
 
