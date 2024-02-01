@@ -6,7 +6,7 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 import express, { NextFunction, Request, Response } from 'express';
 import next from 'next';
 import initializeExpress from '../config/express';
-import { authRouter, debugRouter } from '../routes/index';
+import { authRouter, debugRouter, fileRouter } from '../routes/index';
 
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
@@ -24,6 +24,7 @@ const handle = app.getRequestHandler();
 
     server.use('/debug', debugRouter);
     server.use('/auth', authRouter);
+    server.use('/file', fileRouter);
 
     server.use((error: any, _request: Request, response: Response, _next: NextFunction) => {
       console.error(error);

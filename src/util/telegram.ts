@@ -1,7 +1,17 @@
-import { jezzterBot } from '@/lib/telegram';
+import { jezzterBot } from '../lib/telegram';
 
 export async function uploadDocument(file: Buffer) {
-  const response = await jezzterBot.sendDocument('-4194161484', file);
+  // const response = await jezzterBot.sendDocument('-4194161484', file, {
+
+  // });
+  const response = await jezzterBot.sendDocument(
+    '-4194161484',
+    file,
+    {},
+    {
+      contentType: 'application/octet-stream',
+    }
+  );
   console.log(response);
 }
 

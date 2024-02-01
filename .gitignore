@@ -39,6 +39,7 @@ next-env.d.ts
 
 # DB
 **/*.sqlite
+*.csv
 
 # keys
 keys

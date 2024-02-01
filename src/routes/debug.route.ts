@@ -1,7 +1,10 @@
 import Joi from 'joi';
-import { User, sequelize } from '../models/index';
+import { File, FileChunk, User, sequelize } from '../models/index';
 import { Response, Router, Request, NextFunction } from 'express';
 import { hash } from 'bcrypt';
+import { readFileSync } from 'fs';
+import { uploadDocument } from '../util/telegram';
+import path from 'path';
 
 const router: Router = Router();
 
@@ -23,7 +26,8 @@ router.use(async (request: Request, response: Response, next: NextFunction): Pro
  * @throws {Error} - If syncronization fails.
  */
 router.get('/sync_models', async (request: Request, response: Response): Promise<Response> => {
-  await sequelize.sync();
+  await File.sync({ force: true });
+  await FileChunk.sync({ force: true });
 
   return response.status(200).send({ message: 'Syncronization successful' });
 });

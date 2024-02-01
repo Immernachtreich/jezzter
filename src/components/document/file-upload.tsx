@@ -1,34 +1,34 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { MessageSnackbar, MessageSnackbarProps } from '../feedback/snackbar';
+import { splitFileIntoChunks } from '@/util/file';
+import { FileService } from '@/services/file';
 
 export default function FileUpload() {
   const [files, setFiles] = useState<File[]>([]);
+  const [snackbar, setSnackbar] = useState<MessageSnackbarProps>({
+    message: '',
+    open: false,
+    onClose: () => {
+      setSnackbar({ ...snackbar, open: false });
+    },
+  });
 
-  async function uploadFile(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-    try {
-      if (!files.length) {
-        // TODO: Add error snackbar
-        return;
-      }
+  async function uploadFile() {
+    if (!files.length) {
+      return setSnackbar({ ...snackbar, open: true, message: 'No files selected' });
+    }
 
-      console.log(files);
+    const fileService = new FileService();
+    for await (const file of files) {
+      const startTime = Date.now();
 
-      const formData = new FormData();
-      for (const file of files!) {
-        formData.append('files', file);
-      }
+      await fileService.uploadFile(file, (error: any) =>
+        setSnackbar({ ...snackbar, message: error.message, open: true })
+      );
 
-      const res = await axios({
-        url: '/api/cloud/file-upload',
-        method: 'POST',
-        data: formData,
-        onUploadProgress: console.log,
-      });
-
-      console.log(res);
-    } catch (error: any) {
-      console.error(error);
+      console.log('Total time: ', Date.now() - startTime);
     }
   }
 
@@ -39,6 +39,12 @@ export default function FileUpload() {
 
   return (
     <section className="h-[200px] flex flex-col items-center p-4">
+      <MessageSnackbar
+        message={snackbar.message}
+        timeout={2000}
+        open={snackbar.open}
+        onClose={snackbar.onClose}
+      />
       <div
         {...getRootProps()}
         // @ts-ignore: Ignore TypeScript checking for webkitdirectory attribute
