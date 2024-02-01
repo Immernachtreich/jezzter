@@ -9,4 +9,8 @@ export async function authenticate(request: Request, response: Response, next: N
 
   const user = await User.findByPk(userId);
   if (!user) throw new Error(`User with id ${userId} not found. Invalid token or deleted user`);
+
+  request.user = user;
+
+  next();
 }

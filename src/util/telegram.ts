@@ -1,33 +1,25 @@
+import TelegramBot from 'node-telegram-bot-api';
 import { jezzterBot } from '../lib/telegram';
 
-export async function uploadDocument(file: Buffer) {
-  // const response = await jezzterBot.sendDocument('-4194161484', file, {
-
-  // });
-  const response = await jezzterBot.sendDocument(
-    '-4194161484',
+export async function uploadDocument(file: Buffer): Promise<TelegramBot.Message> {
+  return jezzterBot.sendDocument(
+    process.env.CHAT_ID!,
     file,
     {},
-    {
-      contentType: 'application/octet-stream',
-    }
+    { contentType: 'application/octet-stream' }
   );
-  console.log(response);
 }
 
 export async function downloadFile(fileId: string) {
+  const fileChunks = [];
+
   return new Promise((resolve, reject) => {
-    const stream = jezzterBot.getFileStream(fileId); //getting strean to file bytes
-    stream.on('data', chunk => {
-      console.log('getting data');
+    const stream = jezzterBot.getFileStream(fileId);
+    stream.on('data', chunk => fileChunks.push(chunk));
+    stream.on('error', error => {
+      console.error(error);
+      reject(error);
     });
-    stream.on('error', err => {
-      console.log('err');
-      reject(err);
-    });
-    stream.on('end', () => {
-      console.log('end');
-      resolve({ message: 'done' });
-    });
+    stream.on('end', () => resolve({ message: 'done' }));
   });
 }

@@ -34,8 +34,7 @@ export default class File extends Model<InferAttributes<File>, InferCreationAttr
   declare type: string;
 
   @Attribute(DataTypes.BIGINT)
-  @NotNull
-  declare parentId: number;
+  declare parentId?: number;
 
   /* File M <----> 1 User */
   @BelongsTo(() => User, {

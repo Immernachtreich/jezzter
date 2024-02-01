@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { MessageSnackbar, MessageSnackbarProps } from '../feedback/snackbar';
 import { splitFileIntoChunks } from '@/util/file';
-import { FileService } from '@/services/file';
+import { FileService } from '@/services/file.service';
 
 export default function FileUpload() {
   const [files, setFiles] = useState<File[]>([]);

@@ -27,7 +27,7 @@ export default class FileChunk extends Model<
   declare id: CreationOptional<number>;
 
   @Attribute(DataTypes.TEXT)
-  declare telegramId: number;
+  declare telegramId: string;
 
   @Attribute(DataTypes.INTEGER)
   @NotNull

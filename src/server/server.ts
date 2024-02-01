@@ -6,6 +6,7 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 import express, { NextFunction, Request, Response } from 'express';
 import next from 'next';
 import initializeExpress from '../config/express';
+import * as expressType from '../types/express';
 import { authRouter, debugRouter, fileRouter } from '../routes/index';
 
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
