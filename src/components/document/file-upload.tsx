@@ -1,47 +1,24 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { MessageSnackbar, MessageSnackbarProps } from '../feedback/snackbar';
-import { splitFileIntoChunks } from '@/util/file';
 import { FileService } from '@/services/file.service';
+import { useSnackbar } from '@/context/snackbar-context';
 
 export default function FileUpload() {
+  const { showSnackbar } = useSnackbar();
   const [files, setFiles] = useState<File[]>([]);
-  const [snackbar, setSnackbar] = useState<MessageSnackbarProps>({
-    message: '',
-    open: false,
-    onClose: () => {
-      setSnackbar({ ...snackbar, open: false });
-    },
-  });
 
   async function uploadFile() {
-    if (!files.length) {
-      return setSnackbar({ ...snackbar, open: true, message: 'No files selected' });
-    }
+    if (!files.length) return showSnackbar('No files selected');
 
-    const fileService = new FileService(error =>
-      setSnackbar({ ...snackbar, message: error.message, open: true })
-    );
+    const fileService = new FileService(error => showSnackbar(error.message));
 
-    for await (const file of files) {
-      await fileService.uploadFile(file);
-    }
+    for await (const file of files) await fileService.uploadFile(file);
   }
 
-  const { getRootProps, getInputProps } = useDropzone({
-    multiple: true,
-    onDrop: (acceptedFiles: File[]) => setFiles(acceptedFiles),
-  });
+  const { getRootProps, getInputProps } = useDropzone({ multiple: true, onDrop: setFiles });
 
   return (
     <section className="h-[200px] flex flex-col items-center p-4">
-      <MessageSnackbar
-        message={snackbar.message}
-        timeout={2000}
-        open={snackbar.open}
-        onClose={snackbar.onClose}
-      />
       <div
         {...getRootProps()}
         // @ts-ignore: Ignore TypeScript checking for webkitdirectory attribute
