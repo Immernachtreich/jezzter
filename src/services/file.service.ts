@@ -1,45 +1,37 @@
 import { splitFileIntoChunks } from '@/util/file';
 import { Interceptor } from './interceptor.service';
-import { FileChunk } from '@/models/index';
+import { FileChunk, File as FileModel } from '@/models/index';
 
 export class FileService extends Interceptor {
   private onError: (error: any) => void;
-
   constructor(onError?: (error: any) => void) {
     super();
     this.onError = onError ?? (() => null);
   }
 
   public async uploadFile(file: File): Promise<void> {
-    console.log(file);
-
     const chunks = splitFileIntoChunks(file);
     let fileId: number | undefined;
     let order = 1;
 
-    try {
-      for await (const chunk of chunks) {
-        const formData = new FormData();
-        formData.append('chunk', chunk);
+    for await (const chunk of chunks) {
+      const formData = new FormData();
+      formData.append('chunk', chunk);
 
-        fileId = (
-          await this.interceptor<{ fileId: number }>({
-            url: '/file/file_upload',
-            method: 'POST',
-            data: formData,
-            params: { fileId, order, fileType: `.${file.name.split('.')[1]}`, fileName: file.name },
-          })
-        ).data.fileId;
+      fileId = (
+        await this.interceptor<{ fileId: number }>({
+          url: '/file/file_upload',
+          method: 'POST',
+          data: formData,
+          params: { fileId, order, fileType: `.${file.name.split('.')[1]}`, fileName: file.name },
+        })
+      ).data.fileId;
 
-        order += 1;
-      }
-    } catch (error: any) {
-      console.error(error);
-      this.onError(error);
+      order += 1;
     }
   }
 
-  public async fetchFile(fileId: number): Promise<void> {
+  public async downloadFile(fileId: number): Promise<void> {
     const fileChunks = (
       await this.interceptor<FileChunk[]>({
         method: 'GET',
@@ -74,5 +66,9 @@ export class FileService extends Interceptor {
 
     // Clean up resources
     URL.revokeObjectURL(link.href);
+  }
+
+  public async fetchFiles(): Promise<FileModel[]> {
+    return (await this.interceptor<FileModel[]>({ method: 'GET' })).data;
   }
 }

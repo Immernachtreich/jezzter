@@ -25,11 +25,7 @@ export default function FileUpload() {
     );
 
     for await (const file of files) {
-      const startTime = Date.now();
-
       await fileService.uploadFile(file);
-
-      console.log('Total time: ', Date.now() - startTime);
     }
   }
 
