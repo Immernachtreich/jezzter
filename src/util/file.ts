@@ -1,6 +1,6 @@
 const ONE_AND_A_HALF_GB = 1610612736;
 const HUNDRED_KB = 100 * 1024;
-const FOURTY_MEGABYTES = 1024 * 1024 * 40;
+const TWENTY_MEGABYTES = 1024 * 1024 * 20;
 
 /**
  * Function to split a Buffer into multiple chunks of specified or less size.
@@ -35,7 +35,7 @@ export function splitBufferIntoChunks(
  */
 export function splitFileIntoChunks(
   file: File,
-  chunkSize: number = FOURTY_MEGABYTES,
+  chunkSize: number = TWENTY_MEGABYTES,
   offset: number = 0,
   chunks: Blob[] = []
 ): Blob[] {
