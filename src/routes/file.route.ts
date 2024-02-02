@@ -24,6 +24,7 @@ router.post(
   upload.single('chunk'),
   async (request: Request, response: Response) => {
     const schema = Joi.object({
+      fileName: Joi.string().required(),
       fileId: Joi.string().optional(),
       order: Joi.string().required(),
       fileType: Joi.string().required(),
@@ -39,7 +40,7 @@ router.post(
 
     if (!fileId) {
       const createdFile = await File.create({
-        name: file.originalname,
+        name: request.query.fileName as string,
         type: request.query.fileType as string,
         userId: request.user!.id,
       });

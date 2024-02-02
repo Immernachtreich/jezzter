@@ -20,13 +20,14 @@ export default function FileUpload() {
       return setSnackbar({ ...snackbar, open: true, message: 'No files selected' });
     }
 
-    const fileService = new FileService();
+    const fileService = new FileService(error =>
+      setSnackbar({ ...snackbar, message: error.message, open: true })
+    );
+
     for await (const file of files) {
       const startTime = Date.now();
 
-      await fileService.uploadFile(file, (error: any) =>
-        setSnackbar({ ...snackbar, message: error.message, open: true })
-      );
+      await fileService.uploadFile(file);
 
       console.log('Total time: ', Date.now() - startTime);
     }

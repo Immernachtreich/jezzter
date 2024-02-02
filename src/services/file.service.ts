@@ -11,6 +11,8 @@ export class FileService extends Interceptor {
   }
 
   public async uploadFile(file: File): Promise<void> {
+    console.log(file);
+
     const chunks = splitFileIntoChunks(file);
     let fileId: number | undefined;
     let order = 1;
@@ -25,7 +27,7 @@ export class FileService extends Interceptor {
             url: '/file/file_upload',
             method: 'POST',
             data: formData,
-            params: { fileId, order, fileType: file.type },
+            params: { fileId, order, fileType: `.${file.name.split('.')[1]}`, fileName: file.name },
           })
         ).data.fileId;
 
