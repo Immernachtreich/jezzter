@@ -1,3 +1,4 @@
+'use client';
 import { MessageSnackbar } from '@/components/feedback/snackbar';
 import { PropsWithChildren, createContext, useContext, useState } from 'react';
 

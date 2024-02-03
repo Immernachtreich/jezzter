@@ -84,7 +84,7 @@ export default function Login(): React.JSX.Element {
               icon={<IoMdLock />}
             />
             <button
-              className="absolute top-0 right-0 bottom-0 p-2 text-black"
+              className="absolute top-0 right-0 bottom-0 p-2 text-[var(--background-start)]"
               type="button"
               onClick={() => setViewPassword(!viewPassword)}
             >
@@ -92,7 +92,7 @@ export default function Login(): React.JSX.Element {
             </button>
           </div>
           <button
-            className="border-2 my-3 rounded-md p-1 hover:bg-white hover:text-black ease-in-out duration-300"
+            className="border-2 border-[var(--foreground)] my-3 rounded-md p-1 hover:bg-[var(--foreground)] hover:text-[var(--background-start)] ease-in-out duration-300"
             type="submit"
           >
             Login

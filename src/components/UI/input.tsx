@@ -17,11 +17,13 @@ export default function CustomInput(props: InputProps): React.JSX.Element {
   return (
     <>
       <div className="relative">
-        <span className="absolute text-black left-0 top-1/3 block mx-2">{props.icon}</span>
+        <span className="absolute text-[var(--background-start)] left-0 top-1/3 block mx-2">
+          {props.icon}
+        </span>
         <input
           type={props.type}
           placeholder={props.placeholder}
-          className={`p-2 px-7 my-2 rounded-md text-black w-full ${props.className}`}
+          className={`p-2 px-7 my-2 rounded-md text-[var(--background-start)] bg-[var(--foreground)] w-full ${props.className}`}
           {...props.binding}
         />
       </div>
