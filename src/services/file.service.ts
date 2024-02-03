@@ -20,7 +20,11 @@ export class FileService extends Interceptor {
         url: '/file/file_upload',
         method: 'POST',
         data: formData,
-        params: { fileId, fileType: `.${file.name.split('.')[1]}`, fileName: file.name },
+        params: {
+          fileId,
+          fileType: `.${file.name.split('.')[file.name.split('.').length - 1]}`,
+          fileName: file.name,
+        },
       });
       if (!fileIdResponse.data.fileId) return;
 

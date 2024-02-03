@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FileService } from '@/services/file.service';
 import { useSnackbar } from '@/context/snackbar-context';
-import { IoMdCloudUpload } from 'react-icons/io';
+import { IoMdCloudUpload, IoMdClose } from 'react-icons/io';
 import { MdUpload, MdViewAgenda } from 'react-icons/md';
 import { DataGrid } from '@mui/x-data-grid';
 import { Modal } from '@mui/material';
@@ -73,14 +73,15 @@ export default function FileUpload() {
       <Modal
         open={modal}
         onClose={() => setModal(false)}
-        className="flex flex-col justify-center align-middle border-0"
+        className="flex justify-center items-center border-0"
       >
-        <div className="justify-center align-middle border-0 md:flex ">
+        <div className="justify-center items-center border-0 flex flex-col w-full lg:w-1/2">
           <DataGrid
             sx={{
               color: 'white',
-              '[class^="Mui"]': { color: 'white' },
+              '[class^="Mui"]': { color: 'var(--foreground)' },
               backgroundColor: 'var(--background-start)',
+              width: '100%',
             }}
             rows={files.map((file, index) => ({
               name: file.name as string,
@@ -98,6 +99,7 @@ export default function FileUpload() {
             autoHeight
             autoPageSize
           />
+          <WhiteButton onClick={() => setModal(false)}>Close</WhiteButton>
         </div>
       </Modal>
     </section>
