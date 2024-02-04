@@ -24,6 +24,7 @@ export class FileService extends Interceptor {
           fileId,
           fileType: `.${file.name.split('.')[file.name.split('.').length - 1]}`,
           fileName: file.name,
+          order,
         },
       });
       if (!fileIdResponse.data.fileId) return;

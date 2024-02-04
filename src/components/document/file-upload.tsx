@@ -1,25 +1,18 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FileService } from '@/services/file.service';
-import { useSnackbar } from '@/context/snackbar-context';
-import { IoMdCloudUpload, IoMdClose } from 'react-icons/io';
+import { IoMdCloudUpload } from 'react-icons/io';
 import { MdUpload, MdViewAgenda } from 'react-icons/md';
 import { DataGrid } from '@mui/x-data-grid';
 import { Modal } from '@mui/material';
 import WhiteButton from '../UI/button';
 
-export default function FileUpload() {
-  const { showSnackbar } = useSnackbar();
+interface FileUploadProps {
+  onUpload: (filesToBeUploaded: File[]) => void;
+}
+``;
+export default function FileUpload(props: FileUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [modal, setModal] = useState<boolean>(false);
-
-  const uploadFile = async () => {
-    if (!files.length) return showSnackbar('No files selected');
-
-    const fileService = new FileService(error => showSnackbar(error.response.data.message));
-
-    for await (const file of files) await fileService.uploadFile(file);
-  };
 
   const convertFileSize = (size: number): string => {
     const GB = Math.round(size / (1024 * 1024 * 1024));
@@ -54,7 +47,7 @@ export default function FileUpload() {
       </div>
 
       <div className="grid-cols-2">
-        <WhiteButton onClick={uploadFile} className="mx-2">
+        <WhiteButton onClick={() => props.onUpload(files)} className="mx-2">
           <span className="inline-block align-middle text-xl mr-2">
             <MdUpload />
           </span>

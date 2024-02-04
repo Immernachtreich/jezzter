@@ -17,6 +17,16 @@ export default authenticate(function Home(): React.JSX.Element {
     fetchFiles();
   }, []);
 
+  const uploadFile = async (fileToBeUploaded: File[]) => {
+    if (!fileToBeUploaded.length) return showSnackbar('No files selected');
+
+    const fileService = new FileService(error => showSnackbar(error.response.data.message));
+
+    for await (const file of fileToBeUploaded) await fileService.uploadFile(file);
+
+    fetchFiles();
+  };
+
   const fetchFiles = async (): Promise<void> => {
     const fileService = new FileService((error: any) => showSnackbar(error.response.data.message));
     const fetchedFiles = await fileService.fetchFiles();
@@ -25,11 +35,11 @@ export default authenticate(function Home(): React.JSX.Element {
 
   return (
     <>
-      <FileUpload />
+      <FileUpload onUpload={uploadFile} />
       <section className="p-3">
         <h3 className="p-2">My Files:</h3>
 
-        <div className="grid xl:grid-cols-8 lg:grid-cols-6 md:grid-cols-5 grid-cols-2 gap-4">
+        <div className="grid xl:grid-cols-8 lg:grid-cols-6 md:grid-cols-5 grid-cols-2 gap-2">
           {!!files.length &&
             files.map((file, index) => {
               return <FileIcon id={file.id} name={file.name} type={file.type} key={index} />;

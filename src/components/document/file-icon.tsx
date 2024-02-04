@@ -45,8 +45,8 @@ export default function FileIcon(props: FileIconProps): React.JSX.Element {
   };
 
   return (
-    <div className="border-2 rounded-md p-2 md:min-w-[150px]">
-      <div className="flex flex-col justify-center items-center w-full h-full">
+    <div className="border-2 rounded-md md:min-w-[150px]">
+      <div className="flex flex-col justify-center items-center">
         <p className="text-[70px]">{ICONS[props.type] ?? ICONS['.txt']}</p>
         <p className="text-wrap text-xs">{props.name}</p>
         <WhiteButton className="p-1" onClick={downloadFile}>
