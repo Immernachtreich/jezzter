@@ -5,11 +5,16 @@ import {
   MdVideocam,
   MdTextSnippet,
   MdFolderZip,
+  MdDownload,
 } from 'react-icons/md';
 import { LuFileJson } from 'react-icons/lu';
 import { BsFiletypeExe } from 'react-icons/bs';
+import WhiteButton from '../UI/button';
+import { FileService } from '@/services/file.service';
 
-const ICONS = {
+type ICONSType = { [key: string]: React.ReactNode };
+
+const ICONS: ICONSType = {
   '.jpeg': <MdOutlineImage />,
   '.png': <MdOutlineImage />,
   '.jpg': <MdOutlineImage />,
@@ -22,8 +27,32 @@ const ICONS = {
   '.zip': <MdFolderZip />,
   '.rar': <MdFolderZip />,
   '.7zip+': <MdFolderZip />,
+  '.tar': <MdFolderZip />,
+  '.gz': <MdFolderZip />,
 };
 
-export default function FileIcon(): React.JSX.Element {
-  return <div></div>;
+interface FileIconProps {
+  name: string;
+  type: keyof ICONSType;
+  id: number;
+  [key: string]: any;
+}
+
+export default function FileIcon(props: FileIconProps): React.JSX.Element {
+  const downloadFile = async () => {
+    const fileService = new FileService(error => console.log(error));
+    await fileService.downloadFile(props.id, props.name);
+  };
+
+  return (
+    <div className="border-2 rounded-md p-2 md:min-w-[150px]">
+      <div className="flex flex-col justify-center items-center w-full h-full">
+        <p className="text-[70px]">{ICONS[props.type] ?? ICONS['.txt']}</p>
+        <p className="text-wrap text-xs">{props.name}</p>
+        <WhiteButton className="p-1" onClick={downloadFile}>
+          <MdDownload />
+        </WhiteButton>
+      </div>
+    </div>
+  );
 }

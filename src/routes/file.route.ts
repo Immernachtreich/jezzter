@@ -99,11 +99,8 @@ router.get('/fetch_buffer', async (request: Request, response: Response) => {
 });
 
 router.get('/get_files', async (request: Request, response: Response) => {
-  const schema = Joi.object({ fileId: Joi.string().required() });
-  await schema.validateAsync(request.query);
-
   const files = await File.findAll({
-    where: { userId: parseInt(request.query.userId as string, 10) },
+    where: { userId: request.user!.id },
   });
 
   return response.send(files);

@@ -45,13 +45,13 @@ export class FileService extends Interceptor {
     let fileBuffer = [];
 
     for await (const fileChunk of fileChunks) {
-      const chunk = await this.interceptor<number[]>({
+      const chunk = await this.interceptor<ArrayBuffer>({
         method: 'GET',
         url: '/file/fetch_buffer',
         params: { fileChunkId: fileChunk.id },
         responseType: 'arraybuffer',
       });
-      if (!chunk.data.length) return;
+      if (!chunk.data.byteLength) return;
 
       fileBuffer.push(new Uint8Array(chunk.data));
     }
@@ -60,8 +60,12 @@ export class FileService extends Interceptor {
   }
 
   public async fetchFiles(): Promise<FileModel[]> {
-    const filesResponse = await this.interceptor<FileModel[]>({ method: 'GET' });
+    const filesResponse = await this.interceptor<FileModel[]>({
+      method: 'GET',
+      url: '/file/get_files',
+    });
     if (!filesResponse.data.length) return [];
+
     return filesResponse.data;
   }
 
