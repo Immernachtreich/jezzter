@@ -10,7 +10,6 @@ import {
 import { LuFileJson } from 'react-icons/lu';
 import { BsFiletypeExe } from 'react-icons/bs';
 import WhiteButton from '../UI/button';
-import { FileService } from '@/services/file.service';
 
 type ICONSType = { [key: string]: React.ReactNode };
 
@@ -36,20 +35,16 @@ interface FileIconProps {
   type: keyof ICONSType;
   id: number;
   [key: string]: any;
+  onDownload: (fileId: number, fileName: string) => void;
 }
 
 export default function FileIcon(props: FileIconProps): React.JSX.Element {
-  const downloadFile = async () => {
-    const fileService = new FileService(error => console.log(error));
-    await fileService.downloadFile(props.id, props.name);
-  };
-
   return (
     <div className="border-2 rounded-md md:min-w-[150px]">
       <div className="flex flex-col justify-center items-center">
         <p className="text-[70px]">{ICONS[props.type] ?? ICONS['.txt']}</p>
         <p className="text-wrap text-xs">{props.name}</p>
-        <WhiteButton className="p-1" onClick={downloadFile}>
+        <WhiteButton className="p-1" onClick={() => props.onDownload(props.id, props.name)}>
           <MdDownload />
         </WhiteButton>
       </div>

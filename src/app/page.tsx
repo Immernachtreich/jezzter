@@ -8,7 +8,7 @@ export default function Home(): React.JSX.Element {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    router.replace(token ? '/home' : '/login');
+    router.push(token ? '/home' : '/login');
   }, []);
 
   return <div></div>;

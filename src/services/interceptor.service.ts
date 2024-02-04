@@ -12,10 +12,7 @@ export class Interceptor {
 
     this.interceptor.interceptors.response.use(
       response => response,
-      (error: any) => {
-        onError(error);
-        return { data: { isError: true } };
-      }
+      error => onError(error.response.data.message)
     );
   }
 
