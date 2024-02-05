@@ -28,8 +28,9 @@ export default authenticate(function Home(): React.JSX.Element {
   }, []);
 
   const uploadFile = async (fileToBeUploaded: File[]) => {
-    showLoading(true);
     if (!fileToBeUploaded.length) return showSnackbar('No files selected');
+
+    showLoading(true);
 
     for await (const file of fileToBeUploaded) await services.fileService.uploadFile(file);
 
@@ -62,9 +63,9 @@ export default authenticate(function Home(): React.JSX.Element {
       <Loader showLoading={loading} />
       <FileUpload onUpload={uploadFile} />
       <section className="p-3">
-        <h3 className="p-2">My Files:</h3>
+        <h2 className="text-[20px] p-3">My Files:</h2>
 
-        <div className="grid xl:grid-cols-8 lg:grid-cols-6 md:grid-cols-5 grid-cols-2 gap-2">
+        <div className="grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-2 gap-6">
           {!!files.length &&
             files.map((file, index) => {
               return (

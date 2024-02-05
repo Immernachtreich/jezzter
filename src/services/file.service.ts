@@ -1,5 +1,5 @@
 import { splitFileIntoChunks } from '@/util/file';
-import { Interceptor } from './interceptor.service';
+import { Interceptor } from '@/services/interceptor.service';
 import { FileChunk, File as FileModel } from '@/models/index';
 
 export class FileService extends Interceptor {
@@ -9,32 +9,37 @@ export class FileService extends Interceptor {
 
   public async uploadFile(file: File): Promise<void> {
     const chunks = splitFileIntoChunks(file);
-    let fileId: number | undefined;
+
+    const createdFileResponse = await this.interceptor<FileModel>({
+      method: 'POST',
+      url: '/file/create_file',
+      data: {
+        fileName: file.name,
+        fileType: `.${file.name.split('.')[file.name.split('.').length - 1]}`,
+      },
+    });
+    if (!createdFileResponse) return;
+
     let order = 1;
 
     for await (const chunk of chunks) {
       const formData = new FormData();
       formData.append('chunk', chunk);
 
-      const fileIdResponse = await this.interceptor<{ fileId: number }>({
+      await this.interceptor({
         url: '/file/file_upload',
         method: 'POST',
         data: formData,
-        params: {
-          fileId,
-          fileType: `.${file.name.split('.')[file.name.split('.').length - 1]}`,
-          fileName: file.name,
-          order,
-        },
+        params: { fileId: createdFileResponse.data.id, order },
       });
-      if (!fileIdResponse.data.fileId) return;
 
-      fileId = fileIdResponse.data.fileId;
       order += 1;
     }
   }
 
   public async downloadFile(fileId: number, fileName: string): Promise<void> {
+    const startTime = Date.now();
+
     const fileChunksResponse = await this.interceptor<FileChunk[]>({
       method: 'GET',
       url: '/file/get_file_chunks',
@@ -43,19 +48,33 @@ export class FileService extends Interceptor {
     if (!fileChunksResponse.data.length) return;
 
     const fileChunks = fileChunksResponse.data;
-    let fileBuffer = [];
+
+    const fileBuffer: Uint8Array[] = [];
+    let chunkPromises = [];
 
     for await (const fileChunk of fileChunks) {
-      const chunk = await this.interceptor<ArrayBuffer>({
+      const chunk = this.interceptor<ArrayBuffer>({
         method: 'GET',
         url: '/file/fetch_buffer',
         params: { fileChunkId: fileChunk.id },
         responseType: 'arraybuffer',
       });
-      if (!chunk.data.byteLength) return;
+      chunkPromises.push(chunk);
 
-      fileBuffer.push(new Uint8Array(chunk.data));
+      if (chunkPromises.length >= 20) {
+        const chunks = await Promise.all(chunkPromises);
+        chunks.forEach(chunk => fileBuffer.push(new Uint8Array(chunk.data)));
+        chunkPromises = [];
+      }
     }
+
+    if (chunkPromises.length) {
+      const chunks = await Promise.all(chunkPromises);
+      chunks.forEach(chunk => fileBuffer.push(new Uint8Array(chunk.data)));
+      chunkPromises = [];
+    }
+
+    console.log('time: ', Date.now() - startTime);
 
     this.initiateDownload(fileBuffer, fileName);
   }

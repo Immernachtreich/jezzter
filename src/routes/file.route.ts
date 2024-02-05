@@ -13,6 +13,27 @@ const upload = multer();
 router.use(authenticate);
 
 /**
+ * API for creating a file entry in the database.
+ * To be used before uploading chunks for a particular file.
+ * @body {{ fileName: string, fileType: string }} - The metadata for the file.
+ * @response {File} - The created file.
+ */
+router.post('/create_file', async (request: Request, response: Response) => {
+  await Joi.object({
+    fileName: Joi.string().required(),
+    fileType: Joi.string().required(),
+  }).validateAsync(request.body, { abortEarly: false });
+
+  const createdFile = await File.create({
+    name: request.body.fileName,
+    type: request.body.fileType,
+    userId: request.user!.id,
+  });
+
+  response.send(createdFile);
+});
+
+/**
  * API to upload chunks of a file to Telegram and store it.
  * If parent file is not specified a new file is created.
  * @query {{ fileId: string, order: string, fileType: string }} - The details of the file to upload
@@ -23,69 +44,59 @@ router.post(
   '/file_upload',
   upload.single('chunk'),
   async (request: Request, response: Response) => {
-    const schema = Joi.object({
-      fileName: Joi.string().required(),
-      fileId: Joi.string().optional(),
-      order: Joi.string().required(),
-      fileType: Joi.string().required(),
-    });
-    await schema.validateAsync(request.query, { abortEarly: false });
+    await Joi.object({
+      fileId: Joi.number().optional(),
+      order: Joi.number().required(),
+    }).validateAsync(request.query, { abortEarly: false });
 
     const file = request.file;
     if (!file) throw new ApiError({ statusCode: 400, message: 'No file was uploaded' });
 
-    let fileId: number = parseInt(request.query.fileId as string, 10);
-
     const document = await uploadDocument(file.buffer);
 
-    if (!fileId) {
-      const createdFile = await File.create({
-        name: request.query.fileName as string,
-        type: request.query.fileType as string,
-        userId: request.user!.id,
-      });
-      fileId = createdFile.id;
-    }
-
-    await FileChunk.create({
-      fileId,
+    const fileChunk = await FileChunk.create({
+      fileId: parseInt(request.query.fileId as string, 10),
       order: parseInt(request.query.order as string, 10),
       telegramId: document.document!.file_id,
     });
 
-    response.send({ fileId: fileId, message: 'Done' });
+    return response.send(fileChunk);
   }
 );
 
+/**
+ * API for fetching all chunks corresponding to a file.
+ * @query {{ fileId: string }} - The id of the file whose chunks to be fetched.
+ * @response {{FileChunk[]}} - The fetched chunks.
+ */
 router.get('/get_file_chunks', async (request: Request, response: Response) => {
-  const schema = Joi.object({ fileId: Joi.string().required() });
-  await schema.validateAsync(request.query);
-
-  const fileId: number = parseInt(request.query.fileId as string, 10);
-
-  const file = await File.findOne({
-    where: { id: fileId, userId: request.user?.id },
-    raw: true,
-  });
-  if (!file) throw new ApiError({ message: 'File not found', statusCode: 404 });
+  await Joi.object({ fileId: Joi.number().required() }).validateAsync(request.query);
 
   const fileChunks = await FileChunk.findAll({
-    where: { fileId },
+    where: { fileId: parseInt(request.query.fileId as string, 10) },
     order: [['order', 'ASC']],
   });
 
-  response.status(200).send(fileChunks);
+  return response.status(200).send(fileChunks);
 });
 
+/**
+ * API for fetching buffer for a singular fileChunk.
+ * @query {{ fileChunkId: string }} - The id of the file chunk whose buffer to be fetched.
+ * @response {ArrayBuffer[]} - The fetched buffer
+ */
 router.get('/fetch_buffer', async (request: Request, response: Response) => {
-  const schema = Joi.object({ fileChunkId: Joi.string().required() });
+  const schema = Joi.object({ fileChunkId: Joi.number().required() });
   await schema.validateAsync(request.query);
 
-  const fileChunkId: number = parseInt(request.query.fileChunkId as string, 10);
-
   const fileChunk = await FileChunk.findOne({
-    where: { id: fileChunkId },
-    include: { association: FileChunk.associations.File, as: 'file' },
+    where: {
+      id: parseInt(request.query.fileChunkId as string, 10),
+    },
+    include: {
+      association: FileChunk.associations.File,
+      as: 'file',
+    },
   });
   if (!fileChunk) throw new ApiError({ message: 'File chunk not found', statusCode: 404 });
 
@@ -95,7 +106,7 @@ router.get('/fetch_buffer', async (request: Request, response: Response) => {
   const downloadedBuffer = await downloadFile(fileChunk.telegramId);
 
   response.setHeader('Content-Type', 'application/octet-stream');
-  response.send(Buffer.from(downloadedBuffer));
+  return response.send(Buffer.from(downloadedBuffer));
 });
 
 router.get('/get_files', async (request: Request, response: Response) => {
