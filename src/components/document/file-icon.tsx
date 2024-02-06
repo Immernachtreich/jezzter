@@ -43,18 +43,28 @@ interface FileIconProps {
 
 export default function FileIcon(props: FileIconProps): React.JSX.Element {
   return (
-    <div className="border-b rounded-md md:min-w-[150px] p-4">
+    <div
+      className="rounded-md md:min-w-[150px] p-4"
+      style={{
+        background: 'rgba( 255, 255, 255, 0.35 )',
+        boxShadow: '0 8px 32px 0 rgba( 31, 38, 135, 0.37 )',
+        backdropFilter: 'blur( 5px )',
+        WebkitBackdropFilter: 'blur( 5px )',
+      }}
+    >
       <div className="flex flex-col justify-between items-start">
         <div className="flex justify-start items-end w-full">
           <p className="text-[40px] h-fit">{ICONS[props.type] ?? ICONS['default']}</p>
           <WhiteButton
-            className="mx-1 my-0 text-center border-none"
+            className="text-center border-none"
+            style={{ margin: '0 5px' }}
             onClick={() => props.onDownload(props.id, props.name)}
           >
             <MdDownload />
           </WhiteButton>
           <WhiteButton
-            className="text-red-400 my-0 border-none hover:text-[var(--foreground)] hover:bg-red-400 mx-1"
+            className="text-red-400 border-none hover:text-[var(--foreground)] hover:bg-red-400 mx-1"
+            style={{ margin: '0 5px' }}
             // onClick={() => props.onDownload(props.id, props.name)}
           >
             <MdDelete />

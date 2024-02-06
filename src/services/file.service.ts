@@ -7,7 +7,10 @@ export class FileService extends Interceptor {
     super(onError ?? (() => null));
   }
 
-  public async uploadFile(file: File): Promise<void> {
+  public async uploadFile(
+    file: File,
+    reportProgress: (progress: number, fileName: string) => void
+  ): Promise<void> {
     const chunks = splitFileIntoChunks(file);
 
     const createdFileResponse = await this.interceptor<FileModel>({
@@ -32,6 +35,9 @@ export class FileService extends Interceptor {
         data: formData,
         params: { fileId: createdFileResponse.data.id, order },
       });
+
+      const progressPrecent = (order / chunks.length) * 100;
+      reportProgress(progressPrecent, file.name);
 
       order += 1;
     }
@@ -61,7 +67,7 @@ export class FileService extends Interceptor {
       });
       chunkPromises.push(chunk);
 
-      if (chunkPromises.length >= 20) {
+      if (chunkPromises.length >= 10) {
         const chunks = await Promise.all(chunkPromises);
         chunks.forEach(chunk => fileBuffer.push(new Uint8Array(chunk.data)));
         chunkPromises = [];

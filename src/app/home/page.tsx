@@ -9,21 +9,37 @@ import { useLayoutEffect, useState } from 'react';
 import { File as FileModel } from '../../models/index';
 import { NonAttribute } from '@sequelize/core';
 import { Loader } from '@/components/feedback/loader';
+import { DeterministicLoader } from '@/components/feedback/deterministic-loader';
 
 export default authenticate(function Home(): React.JSX.Element {
   const { showSnackbar } = useSnackbar();
-  const [files, setFiles] = useState<NonAttribute<FileModel[]>>([]);
+
   const [loading, showLoading] = useState<boolean>(false);
-  const [services, setServices] = useState<{ [key: string]: any }>({});
+  const [deterministicLoading, setDeterministicLoading] = useState<{
+    loading: boolean;
+    primaryProgress: number;
+    secondaryLoader?: boolean;
+    secondaryProgress?: number;
+    loadingText?: string;
+  }>({
+    loading: false,
+    primaryProgress: 0,
+  });
+  const [files, setFiles] = useState<NonAttribute<FileModel[]>>([]);
+  const [services, setServices] = useState<{ fileService?: FileService }>({});
 
   useLayoutEffect(() => {
     setServices({
       fileService: new FileService(error => {
         showLoading(false);
+        setDeterministicLoading({
+          loading: false,
+          primaryProgress: 0,
+          secondaryLoader: false,
+        });
         showSnackbar(error.response.data.message);
       }),
     });
-
     fetchFiles();
   }, []);
 
@@ -32,15 +48,37 @@ export default authenticate(function Home(): React.JSX.Element {
 
     showLoading(true);
 
-    for await (const file of fileToBeUploaded) await services.fileService.uploadFile(file);
+    const reportProgress = (progress: number, fileName: string) => {
+      showLoading(false);
+
+      setDeterministicLoading({
+        loading: true,
+        primaryProgress: progress,
+        loadingText: `Uploading ${fileName}... ${progress}%`,
+      });
+    };
+
+    for (const fileIndex in fileToBeUploaded) {
+      setDeterministicLoading({
+        loading: true,
+        primaryProgress: 0,
+        secondaryLoader: true,
+        secondaryProgress: parseInt(fileIndex, 10),
+      });
+      await services.fileService!.uploadFile(fileToBeUploaded[fileIndex], reportProgress);
+    }
+
+    setDeterministicLoading(dl => {
+      dl.loading = false;
+      return dl;
+    });
 
     fetchFiles();
   };
 
   const downloadFile = async (fileId: number, fileName: string) => {
     showLoading(true);
-
-    await services.fileService.downloadFile(fileId, fileName);
+    await services.fileService!.downloadFile(fileId, fileName);
     showLoading(false);
   };
 
@@ -60,6 +98,11 @@ export default authenticate(function Home(): React.JSX.Element {
 
   return (
     <>
+      <DeterministicLoader
+        showLoading={deterministicLoading.loading}
+        primaryProgress={deterministicLoading.primaryProgress}
+        loadingText={deterministicLoading.loadingText}
+      />
       <Loader showLoading={loading} />
       <FileUpload onUpload={uploadFile} />
       <section className="p-3">

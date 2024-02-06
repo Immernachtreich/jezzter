@@ -16,7 +16,12 @@ body {
 body {
   color: var(--foreground);
   /* background: linear-gradient(to bottom, transparent, var(--background-end)) var(--background-start); */
-  background-color: var(--background-start);
+  /* background-color: var(--background-start); */
+  background-image: url('../../public/background.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-color: black;
 }
 
 @layer utilities {
