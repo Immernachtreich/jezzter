@@ -43,7 +43,11 @@ export class FileService extends Interceptor {
     }
   }
 
-  public async downloadFile(fileId: number, fileName: string): Promise<void> {
+  public async downloadFile(
+    fileId: number,
+    fileName: string,
+    onChunkDownload: (progress: number) => void
+  ): Promise<void> {
     const startTime = Date.now();
 
     const fileChunksResponse = await this.interceptor<FileChunk[]>({
@@ -56,28 +60,16 @@ export class FileService extends Interceptor {
     const fileChunks = fileChunksResponse.data;
 
     const fileBuffer: Uint8Array[] = [];
-    let chunkPromises = [];
 
     for await (const fileChunk of fileChunks) {
-      const chunk = this.interceptor<ArrayBuffer>({
+      const chunk = await this.interceptor<ArrayBuffer>({
         method: 'GET',
         url: '/file/fetch_buffer',
         params: { fileChunkId: fileChunk.id },
         responseType: 'arraybuffer',
       });
-      chunkPromises.push(chunk);
 
-      if (chunkPromises.length >= 10) {
-        const chunks = await Promise.all(chunkPromises);
-        chunks.forEach(chunk => fileBuffer.push(new Uint8Array(chunk.data)));
-        chunkPromises = [];
-      }
-    }
-
-    if (chunkPromises.length) {
-      const chunks = await Promise.all(chunkPromises);
-      chunks.forEach(chunk => fileBuffer.push(new Uint8Array(chunk.data)));
-      chunkPromises = [];
+      fileBuffer.push(new Uint8Array(chunk.data));
     }
 
     console.log('time: ', Date.now() - startTime);

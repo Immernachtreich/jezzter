@@ -12,5 +12,5 @@ export const sequelize = new Sequelize({
   dialectOptions: { ssl: true },
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   models: [User, File, FileChunk],
-  pool: { max: 1, min: 1, acquire: 10000 },
+  pool: { max: 1, min: 0, acquire: 10000 },
 });

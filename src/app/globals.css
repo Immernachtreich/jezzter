@@ -9,19 +9,19 @@ body {
 
 :root {
   --foreground: rgb(220, 220, 220);
-  --background-start: rgb(56, 52, 66);
-  --background-end: rgb(76, 74, 85);
+  --background-start: rgb(71, 57, 107);
+  --background-end: rgb(36, 30, 61);
 }
 
 body {
   color: var(--foreground);
-  /* background: linear-gradient(to bottom, transparent, var(--background-end)) var(--background-start); */
+  background: linear-gradient(to bottom, transparent, var(--background-end)) var(--background-start);
   /* background-color: var(--background-start); */
-  background-image: url('../../public/background.jpg');
+  /* background-image: url('../../public/background.jpg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  background-color: black;
+  background-color: black; */
 }
 
 @layer utilities {

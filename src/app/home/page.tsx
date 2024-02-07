@@ -78,8 +78,19 @@ export default authenticate(function Home(): React.JSX.Element {
 
   const downloadFile = async (fileId: number, fileName: string) => {
     showLoading(true);
-    await services.fileService!.downloadFile(fileId, fileName);
-    showLoading(false);
+    await services.fileService!.downloadFile(fileId, fileName, (progress: number) => {
+      showLoading(false);
+      setDeterministicLoading({
+        loading: true,
+        primaryProgress: progress,
+        loadingText: `Downloading ${fileName}... ${progress}%`,
+      });
+    });
+
+    setDeterministicLoading({
+      loading: false,
+      primaryProgress: 0,
+    });
   };
 
   const fetchFiles = async (): Promise<void> => {

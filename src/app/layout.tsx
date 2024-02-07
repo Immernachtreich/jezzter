@@ -18,7 +18,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={poppins.className}>
-        <div className="fixed top-0 bottom-0 h-full right-0 left-0 blur-md bg-black bg-opacity-50 -z-10"></div>
         <SnackbarProvider>{children}</SnackbarProvider>
       </body>
     </html>
