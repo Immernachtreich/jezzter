@@ -17,7 +17,7 @@ import FileChunk from './file-chunks.model';
 
 @Table({
   freezeTableName: true,
-  tableName: 'files',
+  tableName: 'Files',
 })
 export default class File extends Model<InferAttributes<File>, InferCreationAttributes<File>> {
   @Attribute(DataTypes.BIGINT)
@@ -50,5 +50,5 @@ export default class File extends Model<InferAttributes<File>, InferCreationAttr
 
   /* File 1 <----> M FileChunk */
   @HasMany(() => FileChunk, { foreignKey: 'fileId', sourceKey: 'id' })
-  declare fileChunks?: NonAttribute<File[]>;
+  declare fileChunks?: NonAttribute<FileChunk[]>;
 }

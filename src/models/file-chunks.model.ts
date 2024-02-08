@@ -15,7 +15,7 @@ import File from './file.model';
 
 @Table({
   freezeTableName: true,
-  tableName: 'fileChunks',
+  tableName: 'FileChunks',
 })
 export default class FileChunk extends Model<
   InferAttributes<FileChunk>,
@@ -32,6 +32,10 @@ export default class FileChunk extends Model<
   @Attribute(DataTypes.INTEGER)
   @NotNull
   declare order: number;
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare messageId: number;
 
   /* FileChunk M <----> 1 File */
   @BelongsTo(() => File, {

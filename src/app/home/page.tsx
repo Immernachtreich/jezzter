@@ -46,7 +46,7 @@ export default authenticate(function Home(): React.JSX.Element {
   const uploadFile = async (filesToBeUploaded: File[]) => {
     if (!filesToBeUploaded.length) return showSnackbar('No files selected');
 
-    let fileIndex = 1;
+    let fileIndex = 0;
     for await (const file of filesToBeUploaded) {
       setDeterministicLoading({
         loading: true,
@@ -61,6 +61,8 @@ export default authenticate(function Home(): React.JSX.Element {
           loading: true,
           primaryProgress: progress,
           loadingText: `Uploading ${file.name}... ${progress}%`,
+          secondaryLoader: true,
+          secondaryProgress: (fileIndex / filesToBeUploaded.length) * 100,
         });
       });
     }
@@ -108,12 +110,22 @@ export default authenticate(function Home(): React.JSX.Element {
     showLoading(false);
   };
 
+  const deleteFile = async (fileId: number): Promise<void> => {
+    showLoading(true);
+    await services.fileService?.deleteFile(fileId);
+    showLoading(false);
+
+    fetchFiles();
+  };
+
   return (
     <>
       <DeterministicLoader
         showLoading={deterministicLoading.loading}
         primaryProgress={deterministicLoading.primaryProgress}
         loadingText={deterministicLoading.loadingText}
+        secondaryLoader={deterministicLoading.secondaryLoader}
+        secondaryProgress={deterministicLoading.secondaryProgress}
       />
       <Loader showLoading={loading} />
       <FileUpload onUpload={uploadFile} />
@@ -130,6 +142,7 @@ export default authenticate(function Home(): React.JSX.Element {
                   type={file.type}
                   key={index}
                   onDownload={downloadFile}
+                  onDelete={deleteFile}
                 />
               );
             })}

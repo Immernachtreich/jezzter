@@ -48,7 +48,7 @@ export class FileService extends Interceptor {
         params: { fileId: createdFileResponse.data.id, order },
       });
 
-      const progressPrecent = (order / chunks.length) * 100;
+      const progressPrecent = Math.round((order / chunks.length) * 100);
       reportProgress(progressPrecent);
 
       order += 1;
@@ -107,6 +107,14 @@ export class FileService extends Interceptor {
     });
 
     return filesResponse.data.length ? filesResponse.data : [];
+  }
+
+  public async deleteFile(fileId: number): Promise<void> {
+    return this.interceptor({
+      method: 'DELETE',
+      url: '/file/delete_file',
+      params: { fileId },
+    });
   }
 
   /**

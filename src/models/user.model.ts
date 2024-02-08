@@ -15,7 +15,7 @@ import File from './file.model';
 
 @Table({
   freezeTableName: true,
-  tableName: 'users',
+  tableName: 'Users',
   defaultScope: { attributes: { exclude: ['password'] } },
   scopes: { passwordIncluded: { attributes: { include: ['password'] } } },
 })

@@ -37,8 +37,9 @@ interface FileIconProps {
   name: string;
   type: keyof ICONSType;
   id: number;
-  [key: string]: any;
   onDownload: (fileId: number, fileName: string) => void;
+  onDelete: (fileId: number) => void;
+  [key: string]: any;
 }
 
 export default function FileIcon(props: FileIconProps): React.JSX.Element {
@@ -65,7 +66,7 @@ export default function FileIcon(props: FileIconProps): React.JSX.Element {
           <WhiteButton
             className="text-red-400 border-none hover:text-[var(--foreground)] hover:bg-red-400 mx-1"
             style={{ margin: '0 5px' }}
-            // onClick={() => props.onDownload(props.id, props.name)}
+            onClick={() => props.onDelete(props.id)}
           >
             <MdDelete />
           </WhiteButton>
