@@ -51,7 +51,8 @@ export default authenticate(function Home(): React.JSX.Element {
       setDeterministicLoading({
         loading: true,
         primaryProgress: 0,
-        loadingText: `Uploading ${file.name}... 0%`,
+        // prettier-ignore
+        loadingText: `Uploading ${file.name}... 0%. File: [${fileIndex + 1}/${filesToBeUploaded.length}]`,
         secondaryLoader: true,
         secondaryProgress: (fileIndex / filesToBeUploaded.length) * 100,
       });
@@ -60,7 +61,8 @@ export default authenticate(function Home(): React.JSX.Element {
         setDeterministicLoading({
           loading: true,
           primaryProgress: progress,
-          loadingText: `Uploading ${file.name}... ${progress}%`,
+          // prettier-ignore
+          loadingText: `Uploading ${file.name}... ${progress}%. File: [${fileIndex + 1}/${filesToBeUploaded.length}]`,
           secondaryLoader: true,
           secondaryProgress: (fileIndex / filesToBeUploaded.length) * 100,
         });
@@ -76,24 +78,11 @@ export default authenticate(function Home(): React.JSX.Element {
   };
 
   const downloadFile = async (fileId: number, fileName: string) => {
-    setDeterministicLoading({
-      loading: true,
-      loadingText: `Downloading ${fileName}... 0%`,
-      primaryProgress: 0,
-    });
-
-    await services.fileService!.downloadFile(fileId, fileName, progress => {
-      setDeterministicLoading({
-        loading: true,
-        primaryProgress: progress,
-        loadingText: `Downloading ${fileName}... ${progress}%`,
-      });
-    });
-
-    setDeterministicLoading({
-      loading: false,
-      primaryProgress: 0,
-    });
+    showLoading(true);
+    const startTime = Date.now();
+    await services.fileService!.downloadFile(fileId, fileName);
+    console.log(startTime - Date.now());
+    showLoading(false);
   };
 
   const fetchFiles = async (): Promise<void> => {

@@ -2,6 +2,7 @@ import { splitFileIntoChunks } from '@/util/file';
 import { Interceptor } from '@/services/interceptor.service';
 import { FileChunk, File as FileModel } from '@/models/index';
 import { limitPromise } from '@/util/promise';
+import { AxiosResponse } from 'axios';
 
 /**
  * File service for all file related API operations
@@ -62,11 +63,7 @@ export class FileService extends Interceptor {
    * @param {(progress: number) => string} onChunkDownload - The callback function to be called after every chunk download
    * @returns {Promise<void>}
    */
-  public async downloadFile(
-    fileId: number,
-    fileName: string,
-    onChunkDownload: (progress: number) => void
-  ): Promise<void> {
+  public async downloadFile(fileId: number, fileName: string): Promise<void> {
     // Fetch all the individual chunk's metadata
     const fileChunksResponse = await this.interceptor<FileChunk[]>({
       method: 'GET',
@@ -77,21 +74,17 @@ export class FileService extends Interceptor {
 
     const fileChunks = fileChunksResponse.data;
 
-    const chunkPromises = fileChunks.map((chunk, index) =>
+    const chunkPromises = fileChunks.map(chunk =>
       this.interceptor<ArrayBuffer>({
         method: 'GET',
         url: '/file/fetch_buffer',
         params: { fileChunkId: chunk.id },
         responseType: 'arraybuffer',
-      }).then(response => {
-        onChunkDownload(Math.round((index / fileChunks.length) * 100));
-
-        return response.data;
       })
     );
 
-    const chunks = await limitPromise<ArrayBuffer>(chunkPromises, 10);
-    const fileBuffer = chunks.map(chunk => new Uint8Array(chunk));
+    const chunks = await limitPromise<AxiosResponse<ArrayBuffer>>(chunkPromises, 10);
+    const fileBuffer = chunks.map(chunk => new Uint8Array(chunk.data));
 
     this.initiateDownload(fileBuffer, fileName);
   }
