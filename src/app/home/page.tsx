@@ -43,29 +43,26 @@ export default authenticate(function Home(): React.JSX.Element {
     fetchFiles();
   }, []);
 
-  const uploadFile = async (fileToBeUploaded: File[]) => {
-    if (!fileToBeUploaded.length) return showSnackbar('No files selected');
+  const uploadFile = async (filesToBeUploaded: File[]) => {
+    if (!filesToBeUploaded.length) return showSnackbar('No files selected');
 
-    showLoading(true);
-
-    const reportProgress = (progress: number, fileName: string) => {
-      showLoading(false);
-
-      setDeterministicLoading({
-        loading: true,
-        primaryProgress: progress,
-        loadingText: `Uploading ${fileName}... ${progress}%`,
-      });
-    };
-
-    for (const fileIndex in fileToBeUploaded) {
+    let fileIndex = 1;
+    for await (const file of filesToBeUploaded) {
       setDeterministicLoading({
         loading: true,
         primaryProgress: 0,
+        loadingText: `Uploading ${file.name}... 0%`,
         secondaryLoader: true,
-        secondaryProgress: parseInt(fileIndex, 10),
+        secondaryProgress: (fileIndex / filesToBeUploaded.length) * 100,
       });
-      await services.fileService!.uploadFile(fileToBeUploaded[fileIndex], reportProgress);
+
+      await services.fileService!.uploadFile(file, progress => {
+        setDeterministicLoading({
+          loading: true,
+          primaryProgress: progress,
+          loadingText: `Uploading ${file.name}... ${progress}%`,
+        });
+      });
     }
 
     setDeterministicLoading(dl => {
@@ -73,13 +70,17 @@ export default authenticate(function Home(): React.JSX.Element {
       return dl;
     });
 
-    fetchFiles();
+    await fetchFiles();
   };
 
   const downloadFile = async (fileId: number, fileName: string) => {
-    showLoading(true);
-    await services.fileService!.downloadFile(fileId, fileName, (progress: number) => {
-      showLoading(false);
+    setDeterministicLoading({
+      loading: true,
+      loadingText: `Downloading ${fileName}... 0%`,
+      primaryProgress: 0,
+    });
+
+    await services.fileService!.downloadFile(fileId, fileName, progress => {
       setDeterministicLoading({
         loading: true,
         primaryProgress: progress,

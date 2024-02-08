@@ -1,16 +1,29 @@
 import { splitFileIntoChunks } from '@/util/file';
 import { Interceptor } from '@/services/interceptor.service';
 import { FileChunk, File as FileModel } from '@/models/index';
+import { limitPromise } from '@/util/promise';
 
+/**
+ * File service for all file related API operations
+ * @class
+ * @extends Interceptor
+ */
 export class FileService extends Interceptor {
+  /**
+   * @constructor
+   * @param {(error: any) => any} onError - The function to call when an error occurs
+   */
   constructor(onError?: (error: any) => any) {
     super(onError ?? (() => null));
   }
 
-  public async uploadFile(
-    file: File,
-    reportProgress: (progress: number, fileName: string) => void
-  ): Promise<void> {
+  /**
+   *  Function to break down a given file into chunks and upload it
+   * @param {File} file - The file to be uploaded
+   * @param {(progress: number) => void} reportProgress - The callback function to be called after each chunk upload
+   * @returns {Promise<void>}
+   */
+  public async uploadFile(file: File, reportProgress: (progress: number) => void): Promise<void> {
     const chunks = splitFileIntoChunks(file);
 
     const createdFileResponse = await this.interceptor<FileModel>({
@@ -24,7 +37,6 @@ export class FileService extends Interceptor {
     if (!createdFileResponse) return;
 
     let order = 1;
-
     for await (const chunk of chunks) {
       const formData = new FormData();
       formData.append('chunk', chunk);
@@ -37,19 +49,25 @@ export class FileService extends Interceptor {
       });
 
       const progressPrecent = (order / chunks.length) * 100;
-      reportProgress(progressPrecent, file.name);
+      reportProgress(progressPrecent);
 
       order += 1;
     }
   }
 
+  /**
+   * Function to break a given file into chunks and upload it.
+   * @param {number} fileId - The ID of the file
+   * @param {string} fileName - The name of the file
+   * @param {(progress: number) => string} onChunkDownload - The callback function to be called after every chunk download
+   * @returns {Promise<void>}
+   */
   public async downloadFile(
     fileId: number,
     fileName: string,
     onChunkDownload: (progress: number) => void
   ): Promise<void> {
-    const startTime = Date.now();
-
+    // Fetch all the individual chunk's metadata
     const fileChunksResponse = await this.interceptor<FileChunk[]>({
       method: 'GET',
       url: '/file/get_file_chunks',
@@ -59,35 +77,46 @@ export class FileService extends Interceptor {
 
     const fileChunks = fileChunksResponse.data;
 
-    const fileBuffer: Uint8Array[] = [];
-
-    for await (const fileChunk of fileChunks) {
-      const chunk = await this.interceptor<ArrayBuffer>({
+    const chunkPromises = fileChunks.map((chunk, index) =>
+      this.interceptor<ArrayBuffer>({
         method: 'GET',
         url: '/file/fetch_buffer',
-        params: { fileChunkId: fileChunk.id },
+        params: { fileChunkId: chunk.id },
         responseType: 'arraybuffer',
-      });
+      }).then(response => {
+        onChunkDownload(Math.round((index / fileChunks.length) * 100));
 
-      fileBuffer.push(new Uint8Array(chunk.data));
-    }
+        return response.data;
+      })
+    );
 
-    console.log('time: ', Date.now() - startTime);
+    const chunks = await limitPromise<ArrayBuffer>(chunkPromises, 10);
+    const fileBuffer = chunks.map(chunk => new Uint8Array(chunk));
 
     this.initiateDownload(fileBuffer, fileName);
   }
 
+  /**
+   * Function to fetch all files for a given user
+   * @returns {Promise<FileModel[]>} - The fetched files
+   */
   public async fetchFiles(): Promise<FileModel[]> {
     const filesResponse = await this.interceptor<FileModel[]>({
       method: 'GET',
       url: '/file/get_files',
     });
-    if (!filesResponse.data.length) return [];
 
-    return filesResponse.data;
+    return filesResponse.data.length ? filesResponse.data : [];
   }
 
+  /**
+   * Function to initiate download on the browser
+   * @param {Uint8Array[]} fileBuffer - The file buffer
+   * @param {string} fileName - The name of the file
+   * @returns {void}
+   */
   private initiateDownload(fileBuffer: Uint8Array[], fileName: string): void {
+    // Convert file to a blob
     const blob = new Blob(fileBuffer);
 
     // Create a download link and simulate download
