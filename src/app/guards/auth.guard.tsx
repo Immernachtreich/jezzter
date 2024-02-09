@@ -10,6 +10,12 @@ export function authenticate<T>(Component: () => React.JSX.Element) {
       const token = localStorage.getItem('token');
       if (!token) redirect('/login');
       setToken(token);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .register('/service-worker.js', { type: 'classic' })
+          .then(registration => console.log('scope is: ', registration.scope));
+      }
     }, []);
 
     return <Component {...props} />;
