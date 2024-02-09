@@ -60,4 +60,9 @@ router.post('/signup', async (request: Request, response: Response): Promise<Res
   return response.status(200).send(user);
 });
 
+router.get('/test_service_worker', async (request: Request, response: Response) => {
+  console.log('test service worker');
+  response.status(200).send({ message: 'Yay it works' });
+});
+
 export default router;

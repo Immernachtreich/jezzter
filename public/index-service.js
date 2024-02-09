@@ -1,5 +1,3 @@
-const { resolve } = require('path');
-
 const STORES = ['ChunksToBeUploaded', 'ChunksToBeDownloaded'];
 
 const initDatabse = (event, resolve = null) => {
@@ -9,6 +7,7 @@ const initDatabse = (event, resolve = null) => {
   STORES.forEach(store => {
     if (database.objectStoreNames.contains(store)) return;
 
+    console.log('Loading database');
     database.createObjectStore(store, { autoIncrement: true });
   });
 
@@ -36,7 +35,23 @@ const addChunksToUpload = chunks => {
 
     request.onupgradeneeded = event => initDatabse(event);
 
-    request.onsuccess = () => {};
+    request.onsuccess = event => {
+      /** @type {IDBDatabase} */
+      const database = event.target.result;
+
+      const transaction = database.transaction('ChunksToBeUploaded', 'readwrite');
+      const uploadChunksStore = transaction.objectStore('ChunksToBeUploaded');
+
+      const addChunkQuery = uploadChunksStore.put({ hello: true });
+
+      console.log('Uploading');
+
+      addChunkQuery.onsuccess = console.log;
+      addChunkQuery.onerror = console.error;
+
+      transaction.oncomplete = () => database.close();
+      resolve();
+    };
   });
 };
 

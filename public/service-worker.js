@@ -4,6 +4,12 @@ self.addEventListener('install', event => {
   event.waitUntil(openDatabase());
 });
 
+self.addEventListener('sync', event => {
+  if (event.tag === 'syncEvent') {
+    event.waitUntil(addChunksToUpload());
+  }
+});
+
 // In your web application's JavaScript code
 
 // navigator.serviceWorker
