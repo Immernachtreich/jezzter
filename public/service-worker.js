@@ -1,53 +1,41 @@
 importScripts('./index-service.js');
 
 self.addEventListener('install', event => {
-  // const request = indexedDB.open('files', 1);
   event.waitUntil(openDatabase());
-
-  // request.onupgradeneeded = event => {
-  //   /** @type {IDBDatabase} */
-  //   const database = event.target.result;
-  //   const chunkStore = database.createObjectStore('Chunks', { autoIncrement: true });
-
-  //   console.log(chunkStore);
-  // };
-
-  // request.onsuccess = event => {};
 });
 
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('files', 1);
+// In your web application's JavaScript code
 
-    request.onupgradeneeded = event => {
-      const database = event.target.result;
+// navigator.serviceWorker
+//   .register('/sw.js')
+//   .then(registration => {
+//     // Service Worker registration successful
+//   })
+//   .catch(error => {
+//     console.error('Service Worker registration failed:', error);
+//   });
 
-      // Create an object store only if it doesn't exist
-      if (!database.objectStoreNames.contains('Chunks')) {
-        const chunkStore = database.createObjectStore('Chunks', { autoIncrement: true });
-        console.log(chunkStore);
-      }
-    };
+// // Trigger file upload
+// function uploadFile(file) {
+//   // Save file and metadata to IndexedDB with a flag indicating it needs to be uploaded
+//   saveToIndexedDB(file, metadata, { needsUpload: true });
 
-    request.onsuccess = event => {
-      /** @type {IDBDatabase} */
-      const database = event.target.result;
+//   // Request a background sync to attempt the upload even if the app is closed
+//   navigator.serviceWorker.ready.then(registration => {
+//     return registration.sync.register('uploadSync');
+//   });
+// }
 
-      const transaction = database.transaction('Chunks', 'readwrite');
+// // In your service worker (sw.js)
 
-      const chunksStore = transaction.objectStore('Chunks');
+// self.addEventListener('sync', event => {
+//   if (event.tag === 'uploadSync') {
+//     event.waitUntil(uploadPendingFiles());
+//   }
+// });
 
-      const addChunkQuery = chunksStore.put({ hello: true });
-
-      addChunkQuery.onsuccess = console.log;
-      addChunkQuery.onerror = console.error;
-
-      transaction.oncomplete = () => database.close();
-      resolve();
-    };
-
-    request.onerror = event => {
-      reject(new Error(`Error opening IndexedDB: ${event.target.error}`));
-    };
-  });
-}
+// function uploadPendingFiles() {
+//   // Check IndexedDB for files that need to be uploaded
+//   // Attempt to upload files using Fetch API or other appropriate method
+//   // Implement retry mechanism
+// }
